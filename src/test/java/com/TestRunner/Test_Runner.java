@@ -22,7 +22,6 @@ public class Test_Runner extends BaseClass {
             PageObjectManager.getPageObjectManager().getCheckOutPage().checkOut();
 //        screenshot(PageObjectManager.getPageObjectManager().getFileReader().getDataProperty("sceenshot"));
         PageObjectManager.getPageObjectManager().getAddressPage().addressPage();
-System.out.println("hi welcome");
-System.out.println("hello git");
-System.out.println("Tester1");
+System.out.println("hi tester1");
+
     }}
