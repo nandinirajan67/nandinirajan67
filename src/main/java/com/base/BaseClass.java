@@ -1,5 +1,7 @@
 package com.base;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import org.junit.Assert;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -8,7 +10,10 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.io.FileHandler;
 import org.openqa.selenium.support.ui.Select;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +22,23 @@ import java.util.List;
 public abstract class BaseClass {
     public static WebDriver driver;
 
+    public static ExtentReports extentReports;
+    public static File file;
+
+    public static void extentReportStart(String location) {
+        extentReports = new ExtentReports();
+        file = new File(location);
+        ExtentSparkReporter sparkReporter = new ExtentSparkReporter(file);
+        extentReports.attachReporter(sparkReporter);
+        extentReports.setSystemInfo("os", System.getProperty("os.name"));
+        extentReports.setSystemInfo("java version", System.getProperty("java.version"));
+    }
+
+    public static void extentReportTearDown(String location) throws IOException {
+        extentReports.flush();
+        file = new File(location);
+        Desktop.getDesktop().browse((file).toURI());
+    }
 
     protected static WebDriver launchBrowser(String browserName) {
         try {
@@ -53,8 +75,8 @@ public abstract class BaseClass {
         }
     }
 
-    protected static void clickOnElement(WebElement element){
-        try{
+    protected static void clickOnElement(WebElement element) {
+        try {
             element.click();
         } catch (Exception e) {
             Assert.fail("ERROR:OCCURRED DURING CLICK ON ELEMENT");
@@ -116,15 +138,31 @@ public abstract class BaseClass {
         }
     }
 
+    protected String takeScreenshot() throws IOException {
+           TakesScreenshot screenshot = (TakesScreenshot) driver;
+            String timeStamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
+            File scrfile = screenshot.getScreenshotAs(OutputType.FILE);
+            File destfile = new File("Screenshot\\.png" + "_" + timeStamp + ".png");
+            FileHandler.copy(scrfile, destfile);
+            return destfile.getAbsolutePath();
+               }
+
     protected static void navigateForward() {
         try {
             driver.navigate().forward();
             } catch (Exception e) {
             Assert.fail("ERROR OCCUR DURING FORWARD");
-        }
-        }
+        }}
+        protected static void validation(WebElement element, String expected){
+            try{
+                String actual=element.getText();
+                System.out.println(actual);
+                Assert.assertEquals(actual,expected);
 
-
+            } catch (Exception e) {
+                Assert.fail("ERROE OCCUR DURING VALIDATION");
+            }
+        }
 
     protected static void refresh() {
         try {
@@ -200,21 +238,8 @@ public abstract class BaseClass {
         } catch (Exception e) {
             Assert.fail("ERROR OCCUR DURING ALERT DISMISSED");
         }}
-        protected static void screenshot(String location){
 
-            try {
-                Date currentDate = new Date();
-                System.out.println(currentDate);
-                String dateFile = currentDate.toString().replace(" ", "_").replace(":","_");
-                System.out.println(dateFile);
 
-                File screenshot = ((TakesScreenshot) driver).getScreenshotAs (OutputType. FILE);
-                FileHandler.copy(screenshot, new File( location + dateFile + ".png"));
-
-            } catch (Exception e) {
-                Assert.fail("ERROR OCCURE DURING SCREENSHORT");
-            }
-}
 protected static void frameAction(String id){
         try{
             driver.switchTo().frame(id);
@@ -229,6 +254,7 @@ protected static void close(){
             Assert.fail("ERROR OCCUR DURING CLOSING THE PROGRAM");
         }
 }
+
 }
 
 
